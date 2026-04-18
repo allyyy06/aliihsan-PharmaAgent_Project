@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ortam değişkenleri — ASLA GitHub'a yükleme!
+.env
+
+# Streamlit local secrets — Streamlit Cloud'da Secrets bölümüne girilecek
+.streamlit/secrets.toml
+
+# FAISS vektör veritabanı — büyük, otomatik yeniden oluşturulur
+data/vector_db/
+
+# Oluşturulan PDF raporlar
+data/reports/
+*.pdf
+!data/corpus/*.pdf
+
+# IDE ve OS dosyaları
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Geçici dosyalar
+*.tmp
+*.log

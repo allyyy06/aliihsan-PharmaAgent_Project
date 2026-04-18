@@ -1,0 +1,19 @@
+streamlit
+google-generativeai
+groq
+langchain
+langchain-community
+langchain-google-genai
+# Vector storage handled by FAISS (already below)
+fpdf2
+python-dotenv
+pypdf
+sentence-transformers
+replicate
+Pillow
+langchain-huggingface
+plotly
+streamlit-lottie
+duckduckgo-search
+faiss-cpu
+gtts
