@@ -35,16 +35,16 @@
 | # | Özellik | Açıklama |
 |---|---------|----------|
 | 1 | 👤 **Kişisel Sağlık Profili** | Ad, yaş, kronik hastalık, alerji girişi ile kişiselleştirilmiş analiz |
-| 2 | 📷 **Çoklu Görsel Yükleme** | Kutu + prospektüs aynı anda yüklenip birlikte analiz edilir |
+| 2 | 🔍 **Metin & 📷 Görsel Arama** | İlaç ismini doğrudan yazın veya görsel (kutu+prospektüs) yükleyerek analizi başlatın |
 | 3 | 🌐 **Canlı Web Araması** | FDA/TITCK/EMA'dan anlık toplatma ve uyarı taraması |
 | 4 | 🛡️ **Güvenlik Denetimi** | Yan etki, uyarı ve ölümcül risk tespiti (KIRMIZI ALARM) |
 | 5 | 💊 **Eczacı Ajanı** | Risk durumunda alternatif ilaç önerileri |
 | 6 | 🎯 **Risk Göstergesi** | Plotly ile 0–100 dinamik Gauge (kadran) grafiği |
 | 7 | 💬 **Sohbet Robotu** | Rapor bağlamında Türkçe anlık Q&A |
-| 8 | 🎙️ **Sesli Asistan** | Groq Whisper STT + gTTS ile tam Türkçe ses desteği |
+| 8 | 🎙️ **Sesli Asistan** | Ana araç çubuğunda Groq Whisper STT + gTTS ile tam Türkçe ses desteği |
 | 9 | 🔍 **Rapor Önizleme** | PDF indirmeden önce tam ekran modal görünüm |
 | 10 | 📄 **PDF Raporu** | Tam analizi .PDF olarak kaydetme |
-| 11 | 🎨 **Premium Glassmorphism UI** | Özel CSS, gradient animasyonlar, eczane temalı logo |
+| 11 | 🎨 **Premium Kompakt UI** | Sadelik odaklı yatay araç çubuğu, Glassmorphism CSS, gradient animasyonlar |
 
 ---
 
@@ -139,7 +139,7 @@ streamlit run app.py
 
 1. **API Ayarları** → Proje ana dizinindeki `.env` dosyasını açıp kendi Google ve Groq API anahtarlarınızı yapıştırın. Sistem anahtarları arayüzden gizleyerek sadece arka plandan okuyacaktır.
 2. **Kişisel Sağlık Profili** → İsteğe bağlı: sol panelden sağlık bilgilerinizi doldurun
-3. **Görsel Yükleyin** → İlaç kutusu fotoğrafı (+ opsiyonel prospektüs)
+3. **Analizi Başlatın** → Üst kısımdaki araç çubuğundan doğrudan ilaç adını yazın veya ilaç kutusu fotoğrafı yükleyin ve "Analizi Başlat" butonuna tıklayın.
 4. **Analizi İzleyin** → 7 ajan sırayla çalışır, sonuçlar canlı gösterilir
 5. **Raporu İnceleyin** → "Raporu Önizle" veya "PDF İndir"
 6. **Sohbet Edin** → Rapor hakkında soru sorun veya sesli asistanı kullanın
@@ -162,16 +162,16 @@ streamlit run app.py
 ### Key Features (v2.0)
 
 - **Personalized Health Profile** — Age, chronic diseases, allergies, current medications → personalized risk assessment
-- **Multi-Image Upload** — Box + leaflet simultaneously analyzed
+- **Smart Text & Image Search** — Search precisely by directly typing the drug name or uploading images (Box + leaflet).
 - **Live Web Search** — Real-time FDA/EMA recall lookup via DuckDuckGo (no API key needed)
 - **Safety Auditor** — Detects side effects, contraindications, life-threatening risks (RED ALARM)
 - **Pharmacist Agent** — Suggests safer alternatives when risks are detected
 - **Risk Gauge** — Dynamic Plotly gauge chart (0–100 risk score)
 - **Chat Interface** — Natural language Q&A about the report in Turkish
-- **Voice Assistant** — Groq Whisper STT + gTTS TTS, fully Turkish
-- **Report Preview Modal** — Full-screen preview before PDF download
+- **Voice Assistant** — Integrated prominently in the top toolbar with Groq Whisper STT + gTTS TTS, fully Turkish
+- **Report Preview Modal** — Full-screen clean preview before PDF download
 - **PDF Export** — Complete analysis downloadable as PDF
-- **Premium Glassmorphism UI** — Custom CSS, gradient animations, pharmacy-themed logo
+- **Premium Compact UI** — Simple, horizontal toolbar, custom CSS, gradient animations, and glassmorphism.
 
 ### Quick Start
 

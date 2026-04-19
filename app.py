@@ -208,16 +208,9 @@ with st.sidebar:
                 st.session_state.mas_v2      = PharmaGuardMAS(g_key, gr_key)
                 st.session_state.last_g_key  = g_key
                 st.session_state.last_gr_key = gr_key
-            st.success("✅ Sistem Hazır")
-            with st.expander("🔍 Sistem Detayları"):
-                st.write("**👁 Vision:** Gemini + Groq Fallback")
-                st.write("**📚 RAG:** Local HuggingFace")
-                st.write("**🌐 Web:** DuckDuckGo Search")
-                st.write("**🔊 TTS:** gTTS (Türkçe)")
         except Exception as e:
             st.error(f"Sistem başlatılamadı: {e}")
 
-    st.markdown("---")
     # ── KİŞİSEL SAĞLIK PROFİLİ ────────────────────────────────────────────
     st.markdown("#### 👤 Kişisel Sağlık Profili")
     with st.expander("Profilimi Düzenle", expanded=False):
@@ -240,39 +233,6 @@ with st.sidebar:
         "current_meds": st.session_state.get("u_curr_meds", ""),
     }
 
-    st.markdown("---")
-    # ── SESLİ ASISTAN ─────────────────────────────────────────────────────
-    st.markdown("#### 🎙️ Sesli Asistan")
-    audio_in = st.audio_input("Sorunuzu konuşarak sorun:", key="voice_input")
-    if audio_in and st.session_state.get('report') and gr_key:
-        with st.spinner("🎧 Ses çözümleniyor..."):
-            audio_bytes  = audio_in.read()
-            question_stt = transcribe_audio(audio_bytes, st.session_state.mas_v2.groq_client)
-        if question_stt and "hatası" not in question_stt.lower():
-            st.info(f"🗣️ *{question_stt}*")
-            with st.spinner("🤔 Cevap hazırlanıyor..."):
-                stt_answer = st.session_state.mas_v2.chat_with_report(
-                    question_stt,
-                    st.session_state.report,
-                    st.session_state.chat_history
-                )
-            st.markdown(f"**💬 Cevap:** {stt_answer}")
-            tts_bytes = text_to_speech(stt_answer)
-            if tts_bytes:
-                st.markdown(get_audio_html(tts_bytes), unsafe_allow_html=True)
-        else:
-            st.warning(question_stt)
-
-    st.markdown("---")
-    st.markdown(
-        '<div style="text-align:center;color:#94a3b8;font-size:0.9em;">'
-        '👨‍💻 Tasarım & Geliştirme:<br>'
-        '<b style="color:#60a5fa;">Ali İhsan ÇETİN</b>'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN AREA — HEADER
 # ─────────────────────────────────────────────────────────────────────────────
@@ -294,27 +254,81 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+if not st.session_state.analysis_done:
+    st.markdown(
+        '<div class="agent-card fade-in" style="text-align:center;padding:20px 40px;margin-bottom:2rem;">'
+        '<div style="font-size:3rem;margin-bottom:0.5rem;">🩺</div>'
+        '<h3 style="color:#60a5fa;margin-bottom:1rem;">Akıllı Eczane\'ye Hoş Geldiniz</h3>'
+        '<p style="color:#94a3b8;line-height:1.6;font-size:1.05rem;">'
+        'Sol menüden isteğe bağlı sağlık profilinizi oluşturun.<br>'
+        'Aşağıdaki araç çubuğundan araştırmak istediğiniz ilacın adını yazın veya kutusunun / prospektüsünün görselini yükleyip <b style="color:#fff;">Analizi Başlat</b> butonuna tıklayın.<br>'
+        'Yapay zeka ajanlarımız size en detaylı bilgiyi saniyeler içinde sunacaktır.</p>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
 # ─────────────────────────────────────────────────────────────────────────────
-# COLUMNS — UPLOAD | ANALYSIS
+# MAIN AREA — SEARCH TOOLBAR & VOICE ASSISTANT
+# ─────────────────────────────────────────────────────────────────────────────
+st.markdown('<div class="agent-card fade-in" style="padding: 20px 25px;">', unsafe_allow_html=True)
+top_col1, top_col2, top_col3 = st.columns([1.5, 1.5, 1], gap="medium")
+
+with top_col1:
+    st.markdown("### 🔍 İlaç Arama")
+    text_search = st.text_input("İlaç adını veya etken maddeyi yazın:", key="text_search_input", label_visibility="collapsed", placeholder="İlaç adını yazın...")
+    st.markdown("<br>", unsafe_allow_html=True)
+    search_triggered = st.button("🚀 Analizi Başlat", use_container_width=True, type="primary")
+
+with top_col2:
+    st.markdown("### 📸 Görsel Yükle")
+    img_files = st.file_uploader(
+        "Kutu / Prospektüs",
+        type=["jpg", "png", "jpeg"],
+        accept_multiple_files=True,
+        key="img_uploader",
+        label_visibility="collapsed"
+    )
+
+with top_col3:
+    st.markdown("### 🎙️ Sesli Asistan")
+    audio_in = st.audio_input("Sorunuzu konuşarak sorun:", key="voice_input_main", label_visibility="collapsed")
+    if audio_in and gr_key:
+        with st.spinner("🎧 Ses çözümleniyor..."):
+            audio_bytes  = audio_in.read()
+            question_stt = transcribe_audio(audio_bytes, st.session_state.mas_v2.groq_client)
+        if question_stt and "hatası" not in question_stt.lower():
+            st.info(f"🗣️ *{question_stt}*")
+            if st.session_state.get('report'):
+                with st.spinner("🤔 Cevap hazırlanıyor..."):
+                    stt_answer = st.session_state.mas_v2.chat_with_report(
+                        question_stt,
+                        st.session_state.report,
+                        st.session_state.chat_history
+                    )
+                st.markdown(f"**💬 Cevap:** {stt_answer}")
+                tts_bytes = text_to_speech(stt_answer)
+                if tts_bytes:
+                    st.markdown(get_audio_html(tts_bytes), unsafe_allow_html=True)
+            else:
+                st.warning("Lütfen önce bir ilaç analizi gerçekleştirin.")
+        else:
+            st.warning(question_stt)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COLUMNS — RESULTS | ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 col1, col2 = st.columns([1, 1.6], gap="large")
 
-# ── SOL KOLON — GÖRSEL YÜKLEYİCİ ──────────────────────────────────────────
+# ── SOL KOLON — GÖRSELLER & RİSK ──────────────────────────────────────────
 with col1:
-    st.markdown('<div class="agent-card fade-in">', unsafe_allow_html=True)
-    st.markdown("### 📸 Görsel Tarayıcı")
-    st.caption("İlaç kutusu + prospektüs fotoğrafı yükleyebilirsiniz (çoklu seçim)")
-    img_files = st.file_uploader(
-        "Görselleri buraya sürükleyin...",
-        type=["jpg", "png", "jpeg"],
-        accept_multiple_files=True,
-        key="img_uploader"
-    )
     if img_files:
+        st.markdown('<div class="agent-card fade-in">', unsafe_allow_html=True)
         for i, f in enumerate(img_files):
             st.image(f, use_container_width=True,
                      caption=f"{'📦 İlaç Kutusu' if i == 0 else '📄 Prospektüs'}")
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Risk Gauge (analiz sonrası)
     if st.session_state.risk_score is not None:
@@ -332,15 +346,15 @@ with col1:
 
 # ── SAĞ KOLON — ANALİZ & RAPOR ────────────────────────────────────────────
 with col2:
-    if img_files and g_key and gr_key:
-        # Streamlit her rerun'da analizi tekrar çalıştırmaması için state kontrolü
-        img_keys = tuple(f.name + str(f.size) for f in img_files)
-        if st.session_state.get('last_img_keys') != img_keys:
-            st.session_state.analysis_done = False
-            st.session_state.report = None
-            st.session_state.chat_history = []
-            st.session_state.risk_score = None
+    # Trigger logic: Execute only when button is pressed and we have input
+    has_input = bool(img_files) or bool(text_search)
+    if search_triggered and has_input:
+        st.session_state.analysis_done = False
+        st.session_state.report = None
+        st.session_state.chat_history = []
+        st.session_state.risk_score = None
 
+    if has_input and g_key and gr_key and (search_triggered or st.session_state.analysis_done):
         if not st.session_state.analysis_done:
             st.markdown('<div class="agent-card fade-in">', unsafe_allow_html=True)
             st.markdown("### 🔬 Canlı Analiz Süreci")
@@ -348,19 +362,26 @@ with col2:
             with st.status("🔍 Akıllı Eczane Ajanları Çalışıyor...", expanded=True) as status:
                 try:
                     mas = st.session_state.mas_v2
-                    image_bytes_list = [f.getvalue() for f in img_files]
+                    v_data = {}
+                    drug = text_search.strip()
                     
-                    # 1. Vision Scanner
-                    st.write("📸 Görsel Analiz ediliyor...")
-                    v_data = mas.vision_scanner(image_bytes_list)
-                    if "error" in v_data:
-                        st.error(f"Görsel Analiz Hatası: {v_data['error']}")
-                        status.update(label="❌ Analiz Durduruldu", state="error")
-                        st.stop()
-                    st.caption(f"Aktif Motor: {mas.vision_engine}")
-
-                    drug = (v_data.get("Ilac_Adi") or v_data.get("Ilac Adi")
-                            or v_data.get("İlaç Adı") or v_data.get("Drug Name", "Bilinmeyen"))
+                    if img_files:
+                        image_bytes_list = [f.getvalue() for f in img_files]
+                        # 1. Vision Scanner
+                        st.write("📸 Görsel Analiz ediliyor...")
+                        v_data = mas.vision_scanner(image_bytes_list)
+                        if "error" in v_data:
+                            st.error(f"Görsel Analiz Hatası: {v_data['error']}")
+                            status.update(label="❌ Analiz Durduruldu", state="error")
+                            st.stop()
+                        st.caption(f"Aktif Motor: {mas.vision_engine}")
+                        
+                        # Fallback to visual name if text_search is empty
+                        if not drug:
+                            drug = (v_data.get("Ilac_Adi") or v_data.get("Ilac Adi")
+                                    or v_data.get("İlaç Adı") or v_data.get("Drug Name", "Bilinmeyen"))
+                    elif not drug:
+                        drug = "Bilinmeyen"
 
                     st.write("🚀 **Dağıtık Analiz Başlatıldı** (Multi-threading)...")
                     
@@ -400,7 +421,6 @@ with col2:
                     )
                     st.caption(f"📢 **Son İşlem Modeli:** {mas.last_used_model}")
                     st.session_state.report = report
-                    st.session_state.last_img_keys = img_keys
                     st.session_state.analysis_done = True
                     status.update(label=f"✅ Analiz Tamamlandı! ({mas.last_used_model})", state="complete")
                 except Exception as e:
@@ -437,7 +457,10 @@ with col2:
                         st.markdown(f"#### {line.replace('#','').strip()}")
                     else:
                         if line.strip():
-                            current_section.append(line)
+                            line_str = line.strip().replace('**', '')
+                            if line_str.startswith('* '):
+                                line_str = '• ' + line_str[2:]
+                            current_section.append(line_str)
                 if current_section:
                     st.markdown(
                         f'<div class="report-section">{"<br>".join(current_section)}</div>',
@@ -470,9 +493,10 @@ with col2:
             st.markdown('<div class="agent-card fade-in">', unsafe_allow_html=True)
             st.markdown("### 📋 Analiz Özeti")
             preview = report[:800] + ("..." if len(report) > 800 else "")
+            preview_html = preview.replace('\n', '<br>').replace('* ', '• ').replace('**', '')
             st.markdown(
                 f'<div style="background:rgba(0,0,0,0.2);padding:18px;border-radius:10px;'
-                f'border:1px solid rgba(255,255,255,0.05);line-height:1.7;">{preview}</div>',
+                f'border:1px solid rgba(255,255,255,0.05);line-height:1.7;">{preview_html}</div>',
                 unsafe_allow_html=True
             )
             st.markdown('</div>', unsafe_allow_html=True)
@@ -509,16 +533,3 @@ with col2:
                 st.rerun()
 
             st.markdown('</div>', unsafe_allow_html=True)
-
-    else:
-        st.markdown(
-            '<div class="agent-card fade-in" style="text-align:center;padding:60px 40px;">'
-            '<div style="font-size:4rem;margin-bottom:1rem;">🩺</div>'
-            '<h3 style="color:#60a5fa;">Akıllı Eczane\'ye Hoş Geldiniz</h3>'
-            '<p style="color:#94a3b8;line-height:1.8;">'
-            'Sol menüden isteğe bağlı sağlık profilinizi oluşturun.<br>'
-            'Ardından bir <b>ilaç kutusu fotoğrafı</b> (opsiyonel: prospektüs kağıdını da) yükleyin.<br>'
-            '7 yapay zeka ajanı saniyeler içinde kapsamlı bir tıbbi analiz sunar.</p>'
-            '</div>',
-            unsafe_allow_html=True
-        )
